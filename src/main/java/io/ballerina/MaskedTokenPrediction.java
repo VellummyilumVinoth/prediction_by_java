@@ -17,7 +17,7 @@ import java.util.Optional;
 public class MaskedTokenPrediction {
 
     public static void main(String[] args) {
-//        String sentence = "int <mask> = getAge();";
+//        String sentence = "string <mask>;";
 //        MaskedTokenPrediction predictor = new MaskedTokenPrediction();
 //        String[] predictedTokens = predictor.getPredictedToken(sentence);
 //        for (String predictedToken : predictedTokens) {
@@ -36,13 +36,10 @@ public class MaskedTokenPrediction {
             String[] tokens = encoding.getTokens();
             for (int j = 0; j < tokens.length; j++) {
                 tokens[j] = tokens[j].replace(" ", "").replace("Ġ", "");
-//                System.out.print(tokens[j] + ", ");
                 if (tokens[j].equals("<mask>")) {
                     maskTokenIndex = j;
                 }
             }
-//            System.out.println();
-//            System.out.println(maskTokenIndex);
 
             if (maskTokenIndex == -1) {
                 return null;  // Exit if no masked token is found
@@ -63,8 +60,6 @@ public class MaskedTokenPrediction {
 
             // Run the model
             OrtSession.Result outputs = session.run(inputs);
-//            System.out.println(session.getInputInfo());
-//            System.out.println(session.getOutputInfo());
 
             // Get the predictions for the masked token
             Optional<OnnxValue> optionalValue = outputs.get("output");
