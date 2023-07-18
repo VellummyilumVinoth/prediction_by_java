@@ -18,7 +18,7 @@
 
 ---------------  S U M M A R Y ------------
 
-Command Line: -javaagent:/home/vinoth/.local/share/JetBrains/Toolbox/apps/IDEA-U/ch-0/223.8836.41/lib/idea_rt.jar=39167:/home/vinoth/.local/share/JetBrains/Toolbox/apps/IDEA-U/ch-0/223.8836.41/bin -Dfile.encoding=UTF-8 io.ballerina.Pytorchmodel
+Command Line: -javaagent:/home/vinoth/.local/share/JetBrains/Toolbox/apps/IDEA-U/ch-0/223.8836.41/lib/idea_rt.jar=39167:/home/vinoth/.local/share/JetBrains/Toolbox/apps/IDEA-U/ch-0/223.8836.41/bin -Dfile.encoding=UTF-8 io.ballerina.MaskedTokenPrediction
 
 Host: Intel(R) Core(TM) i5-10210U CPU @ 1.60GHz, 8 cores, 15G, Ubuntu 22.04.2 LTS
 Time: Wed Jun 21 13:02:24 2023 +0530 elapsed time: 3.853834 seconds (0d 0h 0m 3s)
@@ -37,7 +37,7 @@ j  ai.onnxruntime.OrtSession.<init>(Lai/onnxruntime/OrtEnvironment;Ljava/lang/St
 j  ai.onnxruntime.OrtEnvironment.createSession(Ljava/lang/String;Lai/onnxruntime/OrtAllocator;Lai/onnxruntime/OrtSession$SessionOptions;)Lai/onnxruntime/OrtSession;+15
 j  ai.onnxruntime.OrtEnvironment.createSession(Ljava/lang/String;Lai/onnxruntime/OrtSession$SessionOptions;)Lai/onnxruntime/OrtSession;+7
 j  ai.onnxruntime.OrtEnvironment.createSession(Ljava/lang/String;)Lai/onnxruntime/OrtSession;+9
-j  io.ballerina.Pytorchmodel.main([Ljava/lang/String;)V+220
+j  io.ballerina.MaskedTokenPrediction.main([Ljava/lang/String;)V+220
 v  ~StubRoutines::call_stub
 
 siginfo: si_signo: 11 (SIGSEGV), si_code: 1 (SEGV_MAPERR), si_addr: 0x0000000000000000
@@ -874,7 +874,7 @@ ffffffffff600000-ffffffffff601000 --xp 00000000 00:00 0                  [vsysca
 
 VM Arguments:
 jvm_args: -javaagent:/home/vinoth/.local/share/JetBrains/Toolbox/apps/IDEA-U/ch-0/223.8836.41/lib/idea_rt.jar=39167:/home/vinoth/.local/share/JetBrains/Toolbox/apps/IDEA-U/ch-0/223.8836.41/bin -Dfile.encoding=UTF-8 
-java_command: io.ballerina.Pytorchmodel
+java_command: io.ballerina.MaskedTokenPrediction
 java_class_path (initial): /home/vinoth/IdeaProjects/prediction_by_java/target/classes:/home/vinoth/.m2/repository/com/microsoft/onnxruntime/onnxruntime/1.15.0/onnxruntime-1.15.0.jar:/home/vinoth/.m2/repository/ai/djl/pytorch/pytorch-engine/0.19.0/pytorch-engine-0.19.0.jar:/home/vinoth/.m2/repository/ai/djl/api/0.22.0/api-0.22.0.jar:/home/vinoth/.m2/repository/com/google/code/gson/gson/2.10.1/gson-2.10.1.jar:/home/vinoth/.m2/repository/net/java/dev/jna/jna/5.13.0/jna-5.13.0.jar:/home/vinoth/.m2/repository/org/apache/commons/commons-compress/1.22/commons-compress-1.22.jar:/home/vinoth/.m2/repository/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar:/home/vinoth/.m2/repository/ai/djl/model-zoo/0.22.1/model-zoo-0.22.1.jar:/home/vinoth/.m2/repository/ai/djl/huggingface/tokenizers/0.21.0/tokenizers-0.21.0.jar
 Launcher Type: SUN_STANDARD
 

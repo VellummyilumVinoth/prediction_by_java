@@ -18,7 +18,7 @@
             <configuration>
               <transformers>
                 <transformer>
-                  <mainClass>io.ballerina.MaskedTokenPrediction</mainClass>
+                  <mainClass>io.ballerina.AlbertBasePrediction</mainClass>
                 </transformer>
               </transformers>
             </configuration>
