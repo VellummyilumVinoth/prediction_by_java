@@ -9,6 +9,7 @@ import ai.onnxruntime.OrtException;
 import ai.onnxruntime.OrtSession;
 
 import java.io.IOException;
+import java.nio.LongBuffer;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,12 +18,12 @@ import java.util.Optional;
 public class AlbertBasePrediction {
 
     public static void main(String[] args) {
-//        String sentence = "string [MASK];";
-//        AlbertBasePrediction predictor = new AlbertBasePrediction();
-//        String[] predictedTokens = predictor.getBasePredictedToken(sentence);
-//        for (String predictedToken : predictedTokens) {
-//            System.out.println(predictedToken);
-//        }
+        String sentence = "int [MASK] = getCount();";
+        AlbertBasePrediction predictor = new AlbertBasePrediction();
+        String[] predictedTokens = predictor.getBasePredictedToken(sentence);
+        for (String predictedToken : predictedTokens) {
+            System.out.println(predictedToken);
+        }
     }
 
     public static String[] getBasePredictedToken(String sentence) {
@@ -35,7 +36,8 @@ public class AlbertBasePrediction {
 
             String[] tokens = encoding.getTokens();
             for (int j = 0; j < tokens.length; j++) {
-                tokens[j] = tokens[j].replace(" ", "").replace("_", "");
+                tokens[j] = tokens[j].replace(" ", "").replace("▁", "");
+                System.out.println(tokens[j]);
                 if (tokens[j].equals("[MASK]")) {
                     maskTokenIndex = j;
                 }

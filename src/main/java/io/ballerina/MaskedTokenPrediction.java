@@ -9,6 +9,7 @@ import ai.onnxruntime.OrtException;
 import ai.onnxruntime.OrtSession;
 
 import java.io.IOException;
+import java.nio.LongBuffer;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,80 +18,11 @@ import java.util.Optional;
 public class MaskedTokenPrediction {
 
     public static void main(String[] args) {
-//        String sentence = "string <mask>;";
-//        MaskedTokenPrediction predictor = new MaskedTokenPrediction();
-//        String[] predictedTokens = predictor.getPredictedToken(sentence);
-//        for (String predictedToken : predictedTokens) {
-//            System.out.println(predictedToken);
-//        }
-    }
-
-    public static String[] getPredictedToken(String sentence) {
-        try {
-            HuggingFaceTokenizer tokenizer = HuggingFaceTokenizer.newInstance(Paths.get("/home/vinoth/IdeaProjects/prediction_by_java/artifacts/finetuned_albert/tokenizer.json"));
-
-            Encoding encoding = tokenizer.encode(sentence);
-
-            int maskTokenIndex = -1;  // Initialize the mask token index
-
-            String[] tokens = encoding.getTokens();
-            for (int j = 0; j < tokens.length; j++) {
-                tokens[j] = tokens[j].replace(" ", "").replace("Ġ", "");
-                if (tokens[j].equals("<mask>")) {
-                    maskTokenIndex = j;
-                }
-            }
-
-            if (maskTokenIndex == -1) {
-                return null;  // Exit if no masked token is found
-            }
-
-            long[] inputIds = encoding.getIds();
-            long[] attentionMask = encoding.getAttentionMask();
-
-            OrtEnvironment environment = OrtEnvironment.getEnvironment();
-
-            OrtSession session = environment.createSession("/home/vinoth/IdeaProjects/prediction_by_java/artifacts/finetuned_albert/fine_tuned_model.onnx");
-            OnnxTensor inputIdsTensor = OnnxTensor.createTensor(environment, new long[][]{inputIds});
-            OnnxTensor attentionMaskTensor = OnnxTensor.createTensor(environment, new long[][]{attentionMask});
-
-            Map<String, OnnxTensor> inputs = new HashMap<>();
-            inputs.put("input_ids", inputIdsTensor);
-            inputs.put("attention_mask", attentionMaskTensor);
-
-            // Run the model
-            OrtSession.Result outputs = session.run(inputs);
-
-            // Get the predictions for the masked token
-            Optional<OnnxValue> optionalValue = outputs.get("output");
-            OnnxTensor predictionsTensor = (OnnxTensor) optionalValue.get();
-            float[][][] predictions = (float[][][]) predictionsTensor.getValue();
-            int[] predictedTokenIndices = getTopKIndices(predictions[0][maskTokenIndex], 5); // Helper function to get top K indices
-
-            // Get the top predicted tokens
-            String[] topPredictedTokens = new String[Math.max(predictedTokenIndices.length, 5)];
-            for (int i = 0; i < Math.min(predictedTokenIndices.length, 5); i++) {
-                long predictedTokenId = predictedTokenIndices[i];
-                String predictedToken = tokenizer.decode(new long[]{predictedTokenId});
-
-                // Clean the predicted token
-                StringBuilder cleanTokenBuilder = new StringBuilder(predictedToken.length());
-                for (char c : predictedToken.toCharArray()) {
-                    if (Character.isLetterOrDigit(c) || Character.isWhitespace(c)) {
-                        cleanTokenBuilder.append(c);
-                    }
-                }
-                String cleanedToken = cleanTokenBuilder.toString().trim();
-
-                topPredictedTokens[i] = cleanedToken;
-            }
-
-            // Return the top predicted tokens
-            return topPredictedTokens;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (OrtException e) {
-            throw new RuntimeException(e);
+        String sentence = "int <mask> = getCount();";
+        MaskedTokenPrediction predictor = new MaskedTokenPrediction();
+        String[] predictedTokens = predictor.getPredictedToken(sentence);
+        for (String predictedToken : predictedTokens) {
+            System.out.println(predictedToken);
         }
     }
 
@@ -109,5 +41,98 @@ public class MaskedTokenPrediction {
             array[maxIndex] = Float.NEGATIVE_INFINITY;
         }
         return indices;
+    }
+
+    public String[] getPredictedToken(String sentence) {
+        try {
+            HuggingFaceTokenizer tokenizer = HuggingFaceTokenizer.newInstance(Paths.get("/home/vinoth/IdeaProjects/prediction_by_java/artifacts/finetuned_albert/tokenizer.json"));
+
+            Encoding encoding = tokenizer.encode(sentence);
+
+            int maskTokenIndex = -1;  // Initialize the mask token index
+
+            String[] tokens = encoding.getTokens();
+            int numTokens = encoding.getTokens().length;
+            String[] cleanTokens = new String[numTokens];
+            int cleanTokensIndex = 0;
+            for (int j = 0; j < numTokens; j++) {
+                String token = tokens[j].replace(" ", "").replace("Ġ", "").toLowerCase();
+                if (!token.equals("[pad]")) {
+                    cleanTokens[cleanTokensIndex++] = token;
+                }
+                if (token.equals("<mask>")) {
+                    maskTokenIndex = cleanTokensIndex - 1;
+                }
+            }
+
+            if (maskTokenIndex == -1) {
+                return null;  // Exit if no masked token is found
+            }
+
+            String[] actualTokens = new String[cleanTokensIndex];
+            System.arraycopy(cleanTokens, 0, actualTokens, 0, cleanTokensIndex);
+
+            // Update the inputIds and attentionMask arrays
+            long[] inputIds = new long[cleanTokensIndex];
+            long[] attentionMask = new long[cleanTokensIndex];
+            for (int i = 0; i < cleanTokensIndex; i++) {
+                inputIds[i] = encoding.getIds()[i];
+                attentionMask[i] = encoding.getAttentionMask()[i];
+            }
+
+            OrtEnvironment environment = OrtEnvironment.getEnvironment();
+
+            OrtSession session = environment.createSession("/home/vinoth/IdeaProjects/prediction_by_java/artifacts/finetuned_albert/fine_tuned_model.onnx");
+            OnnxTensor inputIdsTensor = OnnxTensor.createTensor(environment,LongBuffer.wrap(inputIds) , new long[]{1, inputIds.length});
+            OnnxTensor attentionMaskTensor = OnnxTensor.createTensor(environment,LongBuffer.wrap(attentionMask) , new long[]{1, attentionMask.length});
+
+            Map<String, OnnxTensor> inputs = new HashMap<>();
+            inputs.put("input_ids", inputIdsTensor);
+            inputs.put("attention_mask", attentionMaskTensor);
+
+            // Run the model
+            OrtSession.Result outputs = session.run(inputs);
+
+            // Get the predictions for the masked token
+            Optional<OnnxValue> optionalValue = outputs.get("output");
+            OnnxTensor predictionsTensor = (OnnxTensor) optionalValue.get();
+            float[][][] predictions = (float[][][]) predictionsTensor.getValue();
+
+            int[] predictedTokenIndices = getTopKIndices(predictions[0][maskTokenIndex], 5); // Assuming single input prediction
+
+            String[] topPredictedTokens = new String[5];
+            int actualLength = 0; // Variable to keep track of the actual number of predicted tokens
+            for (int i = 0; i < Math.min(predictedTokenIndices.length, 5); i++) {
+                int predictedTokenId = predictedTokenIndices[i];
+                String predictedToken = tokenizer.decode(new long[]{predictedTokenId});
+
+                // Clean the predicted token
+                StringBuilder cleanTokenBuilder = new StringBuilder(predictedToken.length());
+                for (char c : predictedToken.toCharArray()) {
+                    if (Character.isLetterOrDigit(c) || Character.isWhitespace(c)) {
+                        cleanTokenBuilder.append(c);
+                    }
+                }
+                String cleanedToken = cleanTokenBuilder.toString().trim();
+
+                if (!cleanedToken.isEmpty()) {
+                    topPredictedTokens[actualLength] = cleanedToken;
+                    actualLength++;
+                }
+            }
+
+            // If the actual number of predicted tokens is less than 5, fill the remaining slots with an empty string
+            for (int i = actualLength; i < topPredictedTokens.length; i++) {
+                topPredictedTokens[i] = "";
+            }
+
+            // Return the top predicted tokens with a fixed length of 5
+            return topPredictedTokens;
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (OrtException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
